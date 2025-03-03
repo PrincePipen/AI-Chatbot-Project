@@ -1,0 +1,64 @@
+<!-- index.html code -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mika AI - Space Companion</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "@google/generative-ai": "https://esm.run/@google/generative-ai"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="space-environment">
+        <div class="stars"></div>
+        <div class="twinkling"></div>
+        <div class="planets">
+            <div class="planet planet-1"></div>
+            <div class="planet planet-2"></div>
+            <div class="comet"></div>
+        </div>
+    </div>
+
+    <div class="chatbot-container">
+        <!-- AI Avatar -->
+        <div class="ai-avatar">
+            <div class="avatar-glow"></div>
+            <img src="mika-neutral.png" alt="Mika AI" id="avatar-img">
+        </div>
+
+        <!-- Chatbox -->
+        <div class="chatbox">
+            <div class="chat-header">
+                <div class="status-indicator"></div>
+                <h3>MIKA AI INTERFACE</h3>
+                <div class="menu-toggle">≡</div>
+            </div>
+            <div class="chat-container"></div>
+            <div class="typing-area">
+                <textarea id="chat-input" placeholder="Ask Mika..." spellcheck="false"></textarea>
+                <button id="send-btn">
+                    <span class="send-icon">▶</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Interactive Menu -->
+        <div class="interactive-menu">
+            <div class="menu-item" data-action="facts">Space Facts</div>
+            <div class="menu-item" data-action="mission">Mission Info</div>
+            <div class="menu-item" data-action="systems">Ship Systems</div>
+            <div class="menu-item" data-action="clear">Clear Chat</div>
+        </div>
+    </div>
+
+    <script type="module" src="mainmodule.js"></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
