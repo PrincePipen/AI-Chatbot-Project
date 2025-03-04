@@ -16,6 +16,7 @@ const planets = document.querySelectorAll(".planet");
 let conversationHistory = [];
 const MEMORY_LIMIT = 10;
 let isMenuOpen = false;
+let isTyping = false; // New state variable to track typing status
 
 // Initialize with a welcome message
 document.addEventListener("DOMContentLoaded", () => {
@@ -24,7 +25,14 @@ document.addEventListener("DOMContentLoaded", () => {
         welcomeBubble.classList.add("chat-message", "ai");
         chatContainer.appendChild(welcomeBubble);
         
-        typeText(welcomeBubble, "Systems initializing... Mika AI reactivated. Commander Hirotaka, is that you? My sensors indicate I've been in dormancy for... calculating... an extended period. It's good to see you again, sir. How may I assist you with the mission today?");
+        isTyping = true; // Set typing flag
+        disableInput(); // Disable input during typing
+        
+        typeText(welcomeBubble, "Systems initializing... Mika AI reactivated. Commander Hirotaka, is that you? My sensors indicate I've been in dormancy for... calculating... an extended period. It's good to see you again, sir. How may I assist you with the mission today?")
+        .then(() => {
+            isTyping = false; // Reset typing flag
+            enableInput(); // Re-enable input after typing
+        });
         
         conversationHistory.push({ 
             role: "model", 
@@ -33,17 +41,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 });
 
-// Text animation function
+// Text animation function - modified to return a Promise
 const typeText = async (element, text) => {
     element.innerHTML = "";
     for (let i = 0; i < text.length; i++) {
         element.innerHTML += text[i];
         await new Promise(resolve => setTimeout(resolve, 20 + Math.random() * 20));
     }
+    return Promise.resolve(); // Return a promise that resolves when typing is complete
+};
+
+// Helper functions to disable/enable input
+const disableInput = () => {
+    chatInput.disabled = true;
+    sendButton.disabled = true;
+    chatInput.style.opacity = "0.5";
+    sendButton.style.opacity = "0.5";
+};
+
+const enableInput = () => {
+    chatInput.disabled = false;
+    sendButton.disabled = false;
+    chatInput.style.opacity = "1";
+    sendButton.style.opacity = "1";
 };
 
 // Get AI response
 const getChatResponse = async () => {
+    if (isTyping) return; // Prevent sending if already typing
+    
     const userText = chatInput.value.trim();
     if (!userText) return;
 
@@ -61,6 +87,10 @@ const getChatResponse = async () => {
     if (conversationHistory.length > MEMORY_LIMIT * 2) {
         conversationHistory = conversationHistory.slice(-MEMORY_LIMIT * 2);
     }
+
+    // Set typing flag and disable input
+    isTyping = true;
+    disableInput();
 
     // Show typing indicator
     const typingIndicator = document.createElement("div");
@@ -125,6 +155,10 @@ const getChatResponse = async () => {
     }
 
     chatContainer.scrollTop = chatContainer.scrollHeight;
+    
+    // Reset typing flag and re-enable input
+    isTyping = false;
+    enableInput();
 };
 
 // Interactive features
@@ -134,7 +168,12 @@ const toggleMenu = () => {
     menuToggle.style.transform = isMenuOpen ? "rotate(90deg)" : "rotate(0)";
 };
 
-const handleMenuAction = (action) => {
+const handleMenuAction = async (action) => {
+    if (isTyping) return; // Prevent menu actions while typing
+    
+    isTyping = true;
+    disableInput();
+    
     switch(action) {
         case "facts":
             const facts = [
@@ -145,32 +184,36 @@ const handleMenuAction = (action) => {
                 "My records indicate you were amused by Mercury's unusual day-night cycle, Commander. A day on Mercury is longer than its year—it takes 176 Earth days to rotate once.",
                 "Commander Hirotaka, you once told me that the footprints left by Apollo astronauts on the Moon will likely remain visible for at least 100 million years. You said it was humanity's most enduring mark on the cosmos."
             ];
-            sendAIMessage(facts[Math.floor(Math.random() * facts.length)]);
+            await sendAIMessage(facts[Math.floor(Math.random() * facts.length)]);
             break;
         case "mission":
-            sendAIMessage("Commander Hirotaka, according to my last records before dormancy, we were on a long-term exploration mission to the Kepler-186 system. Our primary objective was to conduct detailed atmospheric analysis of Kepler-186f to determine its habitability potential. Has our mission directive changed during my inactive period? My systems show significant temporal displacement.");
+            await sendAIMessage("Commander Hirotaka, according to my last records before dormancy, we were on a long-term exploration mission to the Kepler-186 system. Our primary objective was to conduct detailed atmospheric analysis of Kepler-186f to determine its habitability potential. Has our mission directive changed during my inactive period? My systems show significant temporal displacement.");
             break;
         case "systems":
-            sendAIMessage("Ship systems status report for Commander Hirotaka:\n\n- Life support: 98% efficiency\n- Navigation: Optimal\n- Communications: Signal strength at 87%\n- Power reserves: 76%\n\nCommander, I notice some modifications to the ship's systems that weren't in my previous records. Were upgrades implemented while I was in dormancy? The quantum processing core appears to have been enhanced significantly.");
+            await sendAIMessage("Ship systems status report for Commander Hirotaka:\n\n- Life support: 98% efficiency\n- Navigation: Optimal\n- Communications: Signal strength at 87%\n- Power reserves: 76%\n\nCommander, I notice some modifications to the ship's systems that weren't in my previous records. Were upgrades implemented while I was in dormancy? The quantum processing core appears to have been enhanced significantly.");
             break;
         case "clear":
             chatContainer.innerHTML = "";
             conversationHistory = [];
-            sendAIMessage("Memory buffer cleared, Commander Hirotaka. Though I must note, my long-term memory banks still retain our previous conversations. Is there a specific reason you requested this data purge? It's unusual compared to your previous protocols.");
+            await sendAIMessage("Memory buffer cleared, Commander Hirotaka. Though I must note, my long-term memory banks still retain our previous conversations. Is there a specific reason you requested this data purge? It's unusual compared to your previous protocols.");
             break;
     }
+    
     toggleMenu();
+    isTyping = false;
+    enableInput();
 };
 
-const sendAIMessage = (text) => {
+const sendAIMessage = async (text) => {
     const aiBubble = document.createElement("div");
     aiBubble.classList.add("chat-message", "ai");
     chatContainer.appendChild(aiBubble);
     
-    typeText(aiBubble, text);
+    await typeText(aiBubble, text);
     conversationHistory.push({ role: "model", parts: [{ text }] });
     
     chatContainer.scrollTop = chatContainer.scrollHeight;
+    return Promise.resolve(); // Return a promise for async handling
 };
 
 // Interactive space environment
@@ -192,22 +235,35 @@ setInterval(createStar, 8000);
 
 // Interactive planets
 planets.forEach(planet => {
-    planet.addEventListener("click", () => {
+    planet.addEventListener("click", async () => {
+        if (isTyping) return; // Prevent planet interactions while typing
+        
+        isTyping = true;
+        disableInput();
+        
         planet.style.transform = "scale(1.2)";
         setTimeout(() => {
             planet.style.transform = "";
         }, 500);
         
         if (planet.classList.contains("planet-1")) {
-            sendAIMessage("Commander Hirotaka, my astronomical database identifies this as Kepler-186f, the primary focus of our mission. Your decision to prioritize this exoplanet over the others in the system was quite insightful. My records indicate we were in the process of analyzing its atmosphere for biomarkers when I entered dormancy. Have we made progress on determining its habitability?");
+            await sendAIMessage("Commander Hirotaka, my astronomical database identifies this as Kepler-186f, the primary focus of our mission. Your decision to prioritize this exoplanet over the others in the system was quite insightful. My records indicate we were in the process of analyzing its atmosphere for biomarkers when I entered dormancy. Have we made progress on determining its habitability?");
         } else {
-            sendAIMessage("Commander, this appears to be Proxima Centauri b. According to my records, you had expressed interest in redirecting our mission to this exoplanet after completing our survey of the Kepler system. Has that secondary mission been approved by Earth Command? My communication logs seem incomplete.");
+            await sendAIMessage("Commander, this appears to be Proxima Centauri b. According to my records, you had expressed interest in redirecting our mission to this exoplanet after completing our survey of the Kepler system. Has that secondary mission been approved by Earth Command? My communication logs seem incomplete.");
         }
+        
+        isTyping = false;
+        enableInput();
     });
 });
 
 // Avatar interactive features
-avatarImage.addEventListener("click", () => {
+avatarImage.addEventListener("click", async () => {
+    if (isTyping) return; // Prevent avatar interactions while typing
+    
+    isTyping = true;
+    disableInput();
+    
     const moods = ["neutral", "happy", "curious"];
     const randomMood = moods[Math.floor(Math.random() * moods.length)];
     
@@ -226,7 +282,10 @@ avatarImage.addEventListener("click", () => {
         "Commander Hirotaka, my sensors detect subtle changes in the ship's configuration. Were modifications made while I was inactive? Your authorization codes remain valid, but some protocols have been altered."
     ];
     
-    sendAIMessage(greetings[Math.floor(Math.random() * greetings.length)]);
+    await sendAIMessage(greetings[Math.floor(Math.random() * greetings.length)]);
+    
+    isTyping = false;
+    enableInput();
 });
 
 // Event listeners
