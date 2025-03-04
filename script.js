@@ -132,12 +132,17 @@ const getChatResponse = async () => {
         avatarImage.style.transform = "scale(1.1)";
         setTimeout(() => {
             if (response.includes("?")) {
-                avatarImage.src = "mika-curious.png";
+                avatarImage.src = "mika-curious.jpg"; // Question detected
+            } else if (response.length > 150) {
+                avatarImage.src = "mika-informative.jpg"; // Long, informative response
             } else if (response.length > 100) {
-                avatarImage.src = "mika-happy.png";
+                avatarImage.src = "mika-happy.jpg"; // Medium-length response (happy)
+            } else if (response.toLowerCase().includes("error") || response.toLowerCase().includes("problem")) {
+                avatarImage.src = "mika-worried.jpg"; // If response mentions an error or problem
             } else {
-                avatarImage.src = "mika-neutral.png";
+                avatarImage.src = "mika-neutral.jpg"; // Default neutral expression
             }
+
             setTimeout(() => {
                 avatarImage.style.transform = "scale(1)";
             }, 200);
