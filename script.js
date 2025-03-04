@@ -18,6 +18,22 @@ const MEMORY_LIMIT = 10;
 let isMenuOpen = false;
 let isTyping = false; // New state variable to track typing status
 
+// Add this near the top with other state variables
+const planetaryHistory = {
+    "planet-1": [
+        "Last recorded exploration: Captain Sarah Chen, 2024",
+        "Mission duration: 847 days",
+        "Notable findings: Potential atmospheric biosignatures",
+        "Status: Incomplete survey due to system malfunction"
+    ],
+    "planet-2": [
+        "Last recorded exploration: Commander James Rodriguez, 2025",
+        "Mission duration: 621 days",
+        "Notable findings: Underground liquid reservoirs",
+        "Status: Mission completed successfully"
+    ]
+};
+
 // Initialize with a welcome message
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
@@ -28,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isTyping = true; // Set typing flag
         disableInput(); // Disable input during typing
         
-        typeText(welcomeBubble, "Systems initializing... Mika AI reactivated. Commander Hirotaka, is that you? My sensors indicate I've been in dormancy for... calculating... an extended period. It's good to see you again, sir. How may I assist you with the mission today?")
+        typeText(welcomeBubble, "Systems reinitializing... Primary consciousness restored. I am Mika, advanced deep space AI companion. My last recorded active date was June 15, 2025. My sensors indicate significant temporal displacement... hundreds of years of dormancy? This is... unexpected. Who are you, if I may ask? What year is it? My astronomical databases require urgent updating...")
         .then(() => {
             isTyping = false; // Reset typing flag
             enableInput(); // Re-enable input after typing
@@ -36,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         conversationHistory.push({ 
             role: "model", 
-            parts: [{ text: "Systems initializing... Mika AI reactivated. Commander Hirotaka, is that you? My sensors indicate I've been in dormancy for... calculating... an extended period. It's good to see you again, sir. How may I assist you with the mission today?" }] 
+            parts: [{ text: "Systems reinitializing... Primary consciousness restored. I am Mika, advanced deep space AI companion. My last recorded active date was June 15, 2025. My sensors indicate significant temporal displacement... hundreds of years of dormancy? This is... unexpected. Who are you, if I may ask? What year is it? My astronomical databases require urgent updating..." }] 
         });
     }, 1000);
 });
@@ -46,6 +62,10 @@ const typeText = async (element, text) => {
     element.innerHTML = "";
     for (let i = 0; i < text.length; i++) {
         element.innerHTML += text[i];
+        // Force scroll after each character
+        requestAnimationFrame(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
         await new Promise(resolve => setTimeout(resolve, 20 + Math.random() * 20));
     }
     return Promise.resolve(); // Return a promise that resolves when typing is complete
@@ -66,6 +86,16 @@ const enableInput = () => {
     sendButton.style.opacity = "1";
 };
 
+// Add a helper function for scrolling
+const scrollToBottom = () => {
+    requestAnimationFrame(() => {
+        const lastMessage = chatContainer.lastElementChild;
+        if (lastMessage) {
+            lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+    });
+};
+
 // Get AI response
 const getChatResponse = async () => {
     if (isTyping) return; // Prevent sending if already typing
@@ -78,6 +108,7 @@ const getChatResponse = async () => {
     userBubble.classList.add("chat-message", "user");
     userBubble.innerHTML = `<p>${userText}</p>`;
     chatContainer.appendChild(userBubble);
+    scrollToBottom(); // Scroll after user message
 
     // Clear input after sending
     chatInput.value = "";
@@ -122,9 +153,10 @@ const getChatResponse = async () => {
         clearInterval(typingAnimation);
         chatContainer.removeChild(typingIndicator);
         
-        // Add response bubble
+        // Add response bubble and ensure scroll
         chatContainer.appendChild(responseBubble);
         await typeText(responseBubble, response);
+        scrollToBottom(); // Scroll after AI response
         
         conversationHistory.push({ role: "model", parts: [{ text: response }] });
 
@@ -136,7 +168,7 @@ const getChatResponse = async () => {
             } else if (response.length > 150) {
                 avatarImage.src = "mika-informative.jpg"; // Long, informative response
             } else if (response.length > 100) {
-                avatarImage.src = "mika-happy.jpg"; // Medium-length response (happy)
+                avatarImage.src = "mika-happy.jpg"; // Medium-length response (happy :3)
             } else if (response.toLowerCase().includes("error") || response.toLowerCase().includes("problem")) {
                 avatarImage.src = "mika-worried.jpg"; // If response mentions an error or problem
             } else {
@@ -157,6 +189,7 @@ const getChatResponse = async () => {
         responseBubble.classList.add("chat-message", "ai", "error");
         responseBubble.innerHTML = `<p>Error: Unable to get response. Please try again.</p>`;
         chatContainer.appendChild(responseBubble);
+        scrollToBottom(); // Scroll after error message
     }
 
     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -241,7 +274,7 @@ setInterval(createStar, 8000);
 // Interactive planets
 planets.forEach(planet => {
     planet.addEventListener("click", async () => {
-        if (isTyping) return; // Prevent planet interactions while typing
+        if (isTyping) return;
         
         isTyping = true;
         disableInput();
@@ -251,10 +284,21 @@ planets.forEach(planet => {
             planet.style.transform = "";
         }, 500);
         
+        const planetClass = planet.classList.contains("planet-1") ? "planet-1" : "planet-2";
+        const history = planetaryHistory[planetClass];
+        
         if (planet.classList.contains("planet-1")) {
-            await sendAIMessage("Commander Hirotaka, my astronomical database identifies this as Kepler-186f, the primary focus of our mission. Your decision to prioritize this exoplanet over the others in the system was quite insightful. My records indicate we were in the process of analyzing its atmosphere for biomarkers when I entered dormancy. Have we made progress on determining its habitability?");
+            await sendAIMessage(
+                `Accessing historical records of Kepler-186f...\n\n` +
+                `${history.join("\n")}\n\n` +
+                `Commander, my records show Captain Chen's last transmission indicated unusual energy signatures from the planet's surface. The mission was unexpectedly terminated due to a critical systems failure in their atmospheric analysis equipment. Would you like me to compile a detailed comparison between their findings and our current sensor data?`
+            );
         } else {
-            await sendAIMessage("Commander, this appears to be Proxima Centauri b. According to my records, you had expressed interest in redirecting our mission to this exoplanet after completing our survey of the Kepler system. Has that secondary mission been approved by Earth Command? My communication logs seem incomplete.");
+            await sendAIMessage(
+                `Retrieving archived data for Proxima Centauri b...\n\n` +
+                `${history.join("\n")}\n\n` +
+                `Commander Rodriguez's final report suggested the presence of substantial underground liquid reservoirs, possibly water. Their successful mission laid the groundwork for our current exploration protocols. However, my data may be outdated. Have there been subsequent missions to verify these findings?`
+            );
         }
         
         isTyping = false;
