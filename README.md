@@ -1,7 +1,3 @@
- Mika AI - Space Companion
-
-Abstract
-
 Mika AI - Space Companion
 
 ✨ It's an interactive AI chatbot where you play as the Space Commander and Mika is your slightly confused, but very loyal, AI sidekick. Reactivated after centuries of dormancy, Mika provides mission info, space facts, and a whole lot of quirky charm.
