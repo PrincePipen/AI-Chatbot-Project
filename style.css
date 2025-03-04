@@ -126,35 +126,6 @@ body {
     animation: float 20s ease-in-out infinite reverse;
 }
 
-.comet {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    background: white;
-    box-shadow: 0 0 20px 10px rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
-    top: 20%;
-    right: -5%;
-    animation: comet-move 15s linear infinite;
-}
-
-@keyframes comet-move {
-    0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    90% {
-        opacity: 1;
-    }
-    100% {
-        transform: translate(-120vw, 80vh) scale(0.2);
-        opacity: 0;
-    }
-}
-
 @keyframes float {
     0%, 100% {
         transform: translateY(0);
@@ -297,7 +268,7 @@ body {
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) transparent;
     scroll-behavior: smooth;
-    overflow-anchor: none; /* Change from auto to none */
+    overflow-anchor: none;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: y proximity;
 }
@@ -480,8 +451,78 @@ body {
 /* Responsive Design */
 @media (max-width: 480px) {
     .chatbot-container {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .ai-avatar {
+        margin-bottom: 10px;
+    }
+    
+    .ai-avatar img {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .avatar-glow {
+        width: 90px;
+        height: 90px;
+    }
+
+    .chat-container {
+        height: calc(100vh - 220px);
+    }
+
+    .chat-message {
+        max-width: 90%;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .typing-area {
+        padding: 10px;
+    }
+
+    #chat-input {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    #send-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .chat-header h3 {
+        font-size: 14px;
+    }
+
+    .planet-1 {
+        display: none;
+    }
+
+    .planet-2 {
+        width: 60px;
+        height: 60px;
+        opacity: 0.5;
+    }
+
+    .interactive-menu {
+        top: 50px;
+        width: 130px;
+    }
+}
+
+@media (max-width: 768px) {
+    .chatbot-container {
         width: 95%;
-        height: 90vh;
+        height: 95vh;
+        margin: 10px auto;
+    }
+    
+    .ai-avatar {
+        margin-bottom: 15px;
     }
     
     .ai-avatar img {
@@ -493,32 +534,64 @@ body {
         width: 110px;
         height: 110px;
     }
+
+    .chat-container {
+        height: calc(95vh - 250px);
+    }
+
+    .planet-1 {
+        width: 60px;
+        height: 60px;
+        top: 10%;
+        left: 5%;
+    }
+
+    .planet-2 {
+        width: 90px;
+        height: 90px;
+        bottom: 5%;
+        right: 10%;
+    }
+
+    .interactive-menu {
+        right: 0;
+        top: 60px;
+        width: 150px;
+    }
+
+    .menu-item {
+        padding: 8px;
+        font-size: 12px;
+    }
 }
 
-/* Shooting star animation */
-.shooting-star {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: white;
-    border-radius: 50%;
-    box-shadow: 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.1), 0 0 20px rgba(255,255,255,0.9);
-    animation: shooting 3s linear both;
-    z-index: -2;
-}
+@media (max-height: 600px) and (orientation: landscape) {
+    .chatbot-container {
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
+        padding: 10px;
+    }
 
-@keyframes shooting {
-    0% {
-        transform: translateX(0) translateY(0) rotate(-45deg);
-        opacity: 1;
-        box-shadow: 0 0 0 0 rgba(255,255,255,0.1), 0 0 0 0 rgba(255,255,255,0.1), 0 0 0 rgba(255,255,255,0.1);
+    .ai-avatar {
+        margin-bottom: 0;
+        flex-shrink: 0;
     }
-    70% {
-        opacity: 1;
+
+    .chatbox {
+        height: 100%;
+        flex: 1;
     }
-    100% {
-        transform: translateX(-1000px) translateY(1000px) rotate(-45deg);
-        opacity: 0;
+
+    .chat-container {
+        height: calc(100vh - 100px);
+    }
+
+    .planets {
+        opacity: 0.3;
     }
 }
 

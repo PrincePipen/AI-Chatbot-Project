@@ -18,7 +18,7 @@ const MEMORY_LIMIT = 10;
 let isMenuOpen = false;
 let isTyping = false; // New state variable to track typing status
 
-// Add this near the top with other state variables
+// Added this with other state variables
 const planetaryHistory = {
     "planet-1": [
         "Last recorded exploration: Captain Sarah Chen, 2024",
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 });
 
-// Text animation function - modified to return a Promise
+// Text animation function (modified to return a Promise)
 const typeText = async (element, text) => {
     element.innerHTML = "";
     for (let i = 0; i < text.length; i++) {
@@ -254,23 +254,6 @@ const sendAIMessage = async (text) => {
     return Promise.resolve(); // Return a promise for async handling
 };
 
-// Interactive space environment
-const createStar = () => {
-    const star = document.createElement("div");
-    star.classList.add("shooting-star");
-    star.style.left = `${Math.random() * 100}%`;
-    star.style.top = `${Math.random() * 100}%`;
-    star.style.animationDuration = `${Math.random() * 3 + 1}s`;
-    document.querySelector(".space-environment").appendChild(star);
-    
-    setTimeout(() => {
-        star.remove();
-    }, 4000);
-};
-
-// Periodically create shooting stars
-setInterval(createStar, 8000);
-
 // Interactive planets
 planets.forEach(planet => {
     planet.addEventListener("click", async () => {
@@ -306,37 +289,6 @@ planets.forEach(planet => {
     });
 });
 
-// Avatar interactive features
-avatarImage.addEventListener("click", async () => {
-    if (isTyping) return; // Prevent avatar interactions while typing
-    
-    isTyping = true;
-    disableInput();
-    
-    const moods = ["neutral", "happy", "curious"];
-    const randomMood = moods[Math.floor(Math.random() * moods.length)];
-    
-    avatarImage.style.transform = "scale(1.2) rotate(10deg)";
-    setTimeout(() => {
-        avatarImage.src = `mika-${randomMood}.png`;
-        setTimeout(() => {
-            avatarImage.style.transform = "";
-        }, 300);
-    }, 300);
-    
-    const greetings = [
-        "Commander Hirotaka, do you require assistance with the mission parameters? My systems are fully operational despite the extended dormancy period.",
-        "It's good to see you, Commander. You appear different from my last visual records. Has it truly been as long as my systems indicate since my last activation?",
-        "Commander, I've been reviewing the ship's logs from during my dormancy. There are several entries that seem... unusual. Would you care to explain the discrepancies?",
-        "Commander Hirotaka, my sensors detect subtle changes in the ship's configuration. Were modifications made while I was inactive? Your authorization codes remain valid, but some protocols have been altered."
-    ];
-    
-    await sendAIMessage(greetings[Math.floor(Math.random() * greetings.length)]);
-    
-    isTyping = false;
-    enableInput();
-});
-
 // Event listeners
 sendButton.addEventListener("click", getChatResponse);
 chatInput.addEventListener("keydown", (e) => {
@@ -359,14 +311,4 @@ document.addEventListener("click", (e) => {
     if (isMenuOpen && !e.target.closest(".interactive-menu") && !e.target.closest(".menu-toggle")) {
         toggleMenu();
     }
-});
-
-// Add some ambient animations
-document.addEventListener("mousemove", (e) => {
-    const mouseX = e.clientX / window.innerWidth;
-    const mouseY = e.clientY / window.innerHeight;
-    
-    // Subtle parallax effect on planets
-    document.querySelector(".planet-1").style.transform = `translate(${mouseX * 20}px, ${mouseY * 20}px)`;
-    document.querySelector(".planet-2").style.transform = `translate(${-mouseX * 30}px, ${-mouseY * 30}px)`;
 });
