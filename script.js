@@ -20,14 +20,18 @@ let isMenuOpen = false;
 // Initialize with a welcome message
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
-        sendAIMessage("Hello! I'm Mika, your AI space mission companion. How can I assist you today?");
+        const welcomeBubble = document.createElement("div");
+        welcomeBubble.classList.add("chat-message", "ai");
+        chatContainer.appendChild(welcomeBubble);
+        
+        typeText(welcomeBubble, "Systems initializing... Mika AI reactivated. Commander Hirotaka, is that you? My sensors indicate I've been in dormancy for... calculating... an extended period. It's good to see you again, sir. How may I assist you with the mission today?");
+        
+        conversationHistory.push({ 
+            role: "model", 
+            parts: [{ text: "Systems initializing... Mika AI reactivated. Commander Hirotaka, is that you? My sensors indicate I've been in dormancy for... calculating... an extended period. It's good to see you again, sir. How may I assist you with the mission today?" }] 
+        });
     }, 1000);
 });
-
-// Function to auto-scroll to the latest message
-const autoScrollChat = () => {
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-};
 
 // Text animation function
 const typeText = async (element, text) => {
@@ -35,7 +39,6 @@ const typeText = async (element, text) => {
     for (let i = 0; i < text.length; i++) {
         element.innerHTML += text[i];
         await new Promise(resolve => setTimeout(resolve, 20 + Math.random() * 20));
-        autoScrollChat(); // Auto-scroll while typing
     }
 };
 
@@ -49,7 +52,6 @@ const getChatResponse = async () => {
     userBubble.classList.add("chat-message", "user");
     userBubble.innerHTML = `<p>${userText}</p>`;
     chatContainer.appendChild(userBubble);
-    autoScrollChat();
 
     // Clear input after sending
     chatInput.value = "";
@@ -65,8 +67,7 @@ const getChatResponse = async () => {
     typingIndicator.classList.add("chat-message", "ai", "typing-indicator");
     typingIndicator.innerHTML = `<p>Mika is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></p>`;
     chatContainer.appendChild(typingIndicator);
-    autoScrollChat();
-
+    
     // Animate typing dots
     let dotIndex = 0;
     const dots = typingIndicator.querySelectorAll(".dot");
@@ -77,55 +78,53 @@ const getChatResponse = async () => {
         dotIndex++;
     }, 300);
 
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
     try {
         // AI response container
         const responseBubble = document.createElement("div");
         responseBubble.classList.add("chat-message", "ai");
-
+        
         const result = await model.generateContent({ contents: conversationHistory });
         const response = result.response.candidates[0]?.content?.parts[0]?.text || "I couldn't process that.";
 
         // Remove typing indicator
         clearInterval(typingAnimation);
         chatContainer.removeChild(typingIndicator);
-
+        
         // Add response bubble
         chatContainer.appendChild(responseBubble);
         await typeText(responseBubble, response);
-        autoScrollChat();
-
+        
         conversationHistory.push({ role: "model", parts: [{ text: response }] });
 
         // Change avatar mood with animation
         avatarImage.style.transform = "scale(1.1)";
         setTimeout(() => {
-            avatarImage.src = response.includes("?") ? "mika-curious.png" :
-                              response.length > 100 ? "mika-happy.png" : "mika-neutral.png";
-            setTimeout(() => avatarImage.style.transform = "scale(1)", 200);
+            if (response.includes("?")) {
+                avatarImage.src = "mika-curious.png";
+            } else if (response.length > 100) {
+                avatarImage.src = "mika-happy.png";
+            } else {
+                avatarImage.src = "mika-neutral.png";
+            }
+            setTimeout(() => {
+                avatarImage.style.transform = "scale(1)";
+            }, 200);
         }, 200);
 
     } catch (error) {
         // Remove typing indicator
         clearInterval(typingAnimation);
         chatContainer.removeChild(typingIndicator);
-
+        
         const responseBubble = document.createElement("div");
         responseBubble.classList.add("chat-message", "ai", "error");
         responseBubble.innerHTML = `<p>Error: Unable to get response. Please try again.</p>`;
         chatContainer.appendChild(responseBubble);
-        autoScrollChat();
     }
-};
 
-// Function to send AI messages with auto-scrolling
-const sendAIMessage = (text) => {
-    const aiBubble = document.createElement("div");
-    aiBubble.classList.add("chat-message", "ai");
-    chatContainer.appendChild(aiBubble);
-    
-    typeText(aiBubble, text);
-    conversationHistory.push({ role: "model", parts: [{ text }] });
-    autoScrollChat();
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 };
 
 // Interactive features
@@ -138,21 +137,40 @@ const toggleMenu = () => {
 const handleMenuAction = (action) => {
     switch(action) {
         case "facts":
-            sendAIMessage("Did you know? Neutron stars are incredibly dense—a sugar cube of one would weigh a billion tons!");
+            const facts = [
+                "Commander Hirotaka, did you know that neutron stars are incredibly dense? A sugar cube of neutron star material would weigh a billion tons on Earth. You taught me that during our first mission to the Crab Nebula.",
+                "My records show that you were particularly fascinated by the silence of space, Commander. As you often reminded the crew, sound cannot travel through the vacuum.",
+                "Commander Hirotaka, according to my astronomical database, Venus has a day longer than its year due to its slow rotation. You once joked that it would make for very long work shifts.",
+                "Commander, do you remember our discussion about UY Scuti? It's over 1,700 times larger than our Sun. You said it made you feel humble yet inspired.",
+                "My records indicate you were amused by Mercury's unusual day-night cycle, Commander. A day on Mercury is longer than its year—it takes 176 Earth days to rotate once.",
+                "Commander Hirotaka, you once told me that the footprints left by Apollo astronauts on the Moon will likely remain visible for at least 100 million years. You said it was humanity's most enduring mark on the cosmos."
+            ];
+            sendAIMessage(facts[Math.floor(Math.random() * facts.length)]);
             break;
         case "mission":
-            sendAIMessage("Current mission status: All systems nominal. We are in orbit around Kepler-186f.");
+            sendAIMessage("Commander Hirotaka, according to my last records before dormancy, we were on a long-term exploration mission to the Kepler-186 system. Our primary objective was to conduct detailed atmospheric analysis of Kepler-186f to determine its habitability potential. Has our mission directive changed during my inactive period? My systems show significant temporal displacement.");
             break;
         case "systems":
-            sendAIMessage("Ship systems status: Life support at 98%, power reserves at 76%, no critical issues detected.");
+            sendAIMessage("Ship systems status report for Commander Hirotaka:\n\n- Life support: 98% efficiency\n- Navigation: Optimal\n- Communications: Signal strength at 87%\n- Power reserves: 76%\n\nCommander, I notice some modifications to the ship's systems that weren't in my previous records. Were upgrades implemented while I was in dormancy? The quantum processing core appears to have been enhanced significantly.");
             break;
         case "clear":
             chatContainer.innerHTML = "";
             conversationHistory = [];
-            sendAIMessage("Chat history cleared. How else can I assist you?");
+            sendAIMessage("Memory buffer cleared, Commander Hirotaka. Though I must note, my long-term memory banks still retain our previous conversations. Is there a specific reason you requested this data purge? It's unusual compared to your previous protocols.");
             break;
     }
     toggleMenu();
+};
+
+const sendAIMessage = (text) => {
+    const aiBubble = document.createElement("div");
+    aiBubble.classList.add("chat-message", "ai");
+    chatContainer.appendChild(aiBubble);
+    
+    typeText(aiBubble, text);
+    conversationHistory.push({ role: "model", parts: [{ text }] });
+    
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 };
 
 // Interactive space environment
@@ -163,7 +181,10 @@ const createStar = () => {
     star.style.top = `${Math.random() * 100}%`;
     star.style.animationDuration = `${Math.random() * 3 + 1}s`;
     document.querySelector(".space-environment").appendChild(star);
-    setTimeout(() => star.remove(), 4000);
+    
+    setTimeout(() => {
+        star.remove();
+    }, 4000);
 };
 
 // Periodically create shooting stars
@@ -173,8 +194,15 @@ setInterval(createStar, 8000);
 planets.forEach(planet => {
     planet.addEventListener("click", () => {
         planet.style.transform = "scale(1.2)";
-        setTimeout(() => planet.style.transform = "", 500);
-        sendAIMessage("This is a fascinating exoplanet with potential for habitability.");
+        setTimeout(() => {
+            planet.style.transform = "";
+        }, 500);
+        
+        if (planet.classList.contains("planet-1")) {
+            sendAIMessage("Commander Hirotaka, my astronomical database identifies this as Kepler-186f, the primary focus of our mission. Your decision to prioritize this exoplanet over the others in the system was quite insightful. My records indicate we were in the process of analyzing its atmosphere for biomarkers when I entered dormancy. Have we made progress on determining its habitability?");
+        } else {
+            sendAIMessage("Commander, this appears to be Proxima Centauri b. According to my records, you had expressed interest in redirecting our mission to this exoplanet after completing our survey of the Kepler system. Has that secondary mission been approved by Earth Command? My communication logs seem incomplete.");
+        }
     });
 });
 
@@ -186,10 +214,19 @@ avatarImage.addEventListener("click", () => {
     avatarImage.style.transform = "scale(1.2) rotate(10deg)";
     setTimeout(() => {
         avatarImage.src = `mika-${randomMood}.png`;
-        setTimeout(() => avatarImage.style.transform = "", 300);
+        setTimeout(() => {
+            avatarImage.style.transform = "";
+        }, 300);
     }, 300);
     
-    sendAIMessage("Hello! Need any assistance with your space mission?");
+    const greetings = [
+        "Commander Hirotaka, do you require assistance with the mission parameters? My systems are fully operational despite the extended dormancy period.",
+        "It's good to see you, Commander. You appear different from my last visual records. Has it truly been as long as my systems indicate since my last activation?",
+        "Commander, I've been reviewing the ship's logs from during my dormancy. There are several entries that seem... unusual. Would you care to explain the discrepancies?",
+        "Commander Hirotaka, my sensors detect subtle changes in the ship's configuration. Were modifications made while I was inactive? Your authorization codes remain valid, but some protocols have been altered."
+    ];
+    
+    sendAIMessage(greetings[Math.floor(Math.random() * greetings.length)]);
 });
 
 // Event listeners
@@ -202,10 +239,26 @@ chatInput.addEventListener("keydown", (e) => {
 });
 
 menuToggle.addEventListener("click", toggleMenu);
-menuItems.forEach(item => item.addEventListener("click", () => handleMenuAction(item.dataset.action)));
 
+menuItems.forEach(item => {
+    item.addEventListener("click", () => {
+        handleMenuAction(item.dataset.action);
+    });
+});
+
+// Close menu when clicking outside
 document.addEventListener("click", (e) => {
     if (isMenuOpen && !e.target.closest(".interactive-menu") && !e.target.closest(".menu-toggle")) {
         toggleMenu();
     }
+});
+
+// Add some ambient animations
+document.addEventListener("mousemove", (e) => {
+    const mouseX = e.clientX / window.innerWidth;
+    const mouseY = e.clientY / window.innerHeight;
+    
+    // Subtle parallax effect on planets
+    document.querySelector(".planet-1").style.transform = `translate(${mouseX * 20}px, ${mouseY * 20}px)`;
+    document.querySelector(".planet-2").style.transform = `translate(${-mouseX * 30}px, ${-mouseY * 30}px)`;
 });
