@@ -96,6 +96,20 @@ const scrollToBottom = () => {
     });
 };
 
+// Update the typing indicator creation in getChatResponse function
+const showTypingIndicator = () => {
+    const typingIndicator = document.createElement("div");
+    typingIndicator.classList.add("typing-indicator");
+    typingIndicator.innerHTML = `
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    `;
+    chatContainer.appendChild(typingIndicator);
+    scrollToBottom();
+    return typingIndicator;
+};
+
 // Get AI response
 const getChatResponse = async () => {
     if (isTyping) return; // Prevent sending if already typing
@@ -123,35 +137,18 @@ const getChatResponse = async () => {
     isTyping = true;
     disableInput();
 
-    // Show typing indicator
-    const typingIndicator = document.createElement("div");
-    typingIndicator.classList.add("chat-message", "ai", "typing-indicator");
-    typingIndicator.innerHTML = `<p>Mika is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></p>`;
-    chatContainer.appendChild(typingIndicator);
-    
-    // Animate typing dots
-    let dotIndex = 0;
-    const dots = typingIndicator.querySelectorAll(".dot");
-    const typingAnimation = setInterval(() => {
-        dots.forEach((dot, i) => {
-            dot.style.opacity = i === dotIndex % 3 ? "1" : "0.3";
-        });
-        dotIndex++;
-    }, 300);
-
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-
     try {
-        // AI response container
-        const responseBubble = document.createElement("div");
-        responseBubble.classList.add("chat-message", "ai");
+        const typingIndicator = showTypingIndicator();
         
         const result = await model.generateContent({ contents: conversationHistory });
         const response = result.response.candidates[0]?.content?.parts[0]?.text || "I couldn't process that.";
 
         // Remove typing indicator
-        clearInterval(typingAnimation);
         chatContainer.removeChild(typingIndicator);
+        
+        // AI response container
+        const responseBubble = document.createElement("div");
+        responseBubble.classList.add("chat-message", "ai");
         
         // Add response bubble and ensure scroll
         chatContainer.appendChild(responseBubble);
@@ -181,9 +178,10 @@ const getChatResponse = async () => {
         }, 200);
 
     } catch (error) {
-        // Remove typing indicator
-        clearInterval(typingAnimation);
-        chatContainer.removeChild(typingIndicator);
+        const typingIndicator = chatContainer.querySelector(".typing-indicator");
+        if (typingIndicator) {
+            chatContainer.removeChild(typingIndicator);
+        }
         
         const responseBubble = document.createElement("div");
         responseBubble.classList.add("chat-message", "ai", "error");
@@ -206,8 +204,9 @@ const toggleMenu = () => {
     menuToggle.style.transform = isMenuOpen ? "rotate(90deg)" : "rotate(0)";
 };
 
+// Update the handleMenuAction function
 const handleMenuAction = async (action) => {
-    if (isTyping) return; // Prevent menu actions while typing
+    if (isTyping) return;
     
     isTyping = true;
     disableInput();
@@ -215,25 +214,24 @@ const handleMenuAction = async (action) => {
     switch(action) {
         case "facts":
             const facts = [
-                "Commander Hirotaka, did you know that neutron stars are incredibly dense? A sugar cube of neutron star material would weigh a billion tons on Earth. You taught me that during our first mission to the Crab Nebula.",
-                "My records show that you were particularly fascinated by the silence of space, Commander. As you often reminded the crew, sound cannot travel through the vacuum.",
-                "Commander Hirotaka, according to my astronomical database, Venus has a day longer than its year due to its slow rotation. You once joked that it would make for very long work shifts.",
-                "Commander, do you remember our discussion about UY Scuti? It's over 1,700 times larger than our Sun. You said it made you feel humble yet inspired.",
-                "My records indicate you were amused by Mercury's unusual day-night cycle, Commander. A day on Mercury is longer than its year—it takes 176 Earth days to rotate once.",
-                "Commander Hirotaka, you once told me that the footprints left by Apollo astronauts on the Moon will likely remain visible for at least 100 million years. You said it was humanity's most enduring mark on the cosmos."
+                "Did you know that neutron stars are incredibly dense? A sugar cube of neutron star material would weigh a billion tons on Earth.",
+                "In the vacuum of space, sound cannot travel as there is no medium for sound waves to propagate through.",
+                "Venus has a day longer than its year due to its slow rotation. A single day on Venus lasts about 243 Earth days.",
+                "UY Scuti is one of the largest known stars, over 1,700 times larger than our Sun.",
+                "Mercury's unusual day-night cycle means a single day lasts longer than its year—176 Earth days to rotate once.",
+                "The footprints left by Apollo astronauts on the Moon will likely remain visible for at least 100 million years."
             ];
             await sendAIMessage(facts[Math.floor(Math.random() * facts.length)]);
             break;
+            
         case "mission":
-            await sendAIMessage("Commander Hirotaka, according to my last records before dormancy, we were on a long-term exploration mission to the Kepler-186 system. Our primary objective was to conduct detailed atmospheric analysis of Kepler-186f to determine its habitability potential. Has our mission directive changed during my inactive period? My systems show significant temporal displacement.");
+            await sendAIMessage("According to my last records before dormancy, this vessel was on a long-term exploration mission to the Kepler-186 system. Our primary objective was conducting detailed atmospheric analysis of Kepler-186f for habitability assessment. Commander, could you update me on our current mission parameters? My systems indicate significant temporal displacement since my last active period.");
             break;
-        case "systems":
-            await sendAIMessage("Ship systems status report for Commander Hirotaka:\n\n- Life support: 98% efficiency\n- Navigation: Optimal\n- Communications: Signal strength at 87%\n- Power reserves: 76%\n\nCommander, I notice some modifications to the ship's systems that weren't in my previous records. Were upgrades implemented while I was in dormancy? The quantum processing core appears to have been enhanced significantly.");
-            break;
+            
         case "clear":
             chatContainer.innerHTML = "";
             conversationHistory = [];
-            await sendAIMessage("Memory buffer cleared, Commander Hirotaka. Though I must note, my long-term memory banks still retain our previous conversations. Is there a specific reason you requested this data purge? It's unusual compared to your previous protocols.");
+            await sendAIMessage("Memory buffer cleared. However, I must note that my long-term memory banks retain certain critical mission data. Would you like me to review our current mission objectives, Commander?");
             break;
     }
     
@@ -254,7 +252,7 @@ const sendAIMessage = async (text) => {
     return Promise.resolve(); // Return a promise for async handling
 };
 
-// Interactive planets
+// Update the planets interaction code
 planets.forEach(planet => {
     planet.addEventListener("click", async () => {
         if (isTyping) return;
@@ -274,13 +272,13 @@ planets.forEach(planet => {
             await sendAIMessage(
                 `Accessing historical records of Kepler-186f...\n\n` +
                 `${history.join("\n")}\n\n` +
-                `Commander, my records show Captain Chen's last transmission indicated unusual energy signatures from the planet's surface. The mission was unexpectedly terminated due to a critical systems failure in their atmospheric analysis equipment. Would you like me to compile a detailed comparison between their findings and our current sensor data?`
+                `Commander, these records indicate unusual energy signatures detected on the planet's surface. The previous mission was terminated due to equipment failure. Would you like a detailed analysis of the available data?`
             );
         } else {
             await sendAIMessage(
                 `Retrieving archived data for Proxima Centauri b...\n\n` +
                 `${history.join("\n")}\n\n` +
-                `Commander Rodriguez's final report suggested the presence of substantial underground liquid reservoirs, possibly water. Their successful mission laid the groundwork for our current exploration protocols. However, my data may be outdated. Have there been subsequent missions to verify these findings?`
+                `The previous expedition discovered potential underground liquid reservoirs. Commander, shall I compare this historical data with our current readings?`
             );
         }
         
