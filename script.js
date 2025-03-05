@@ -16,18 +16,18 @@ const planets = document.querySelectorAll(".planet");
 let conversationHistory = [];
 const MEMORY_LIMIT = 10;
 let isMenuOpen = false;
-let isTyping = false; // New state variable to track typing status
+let isTyping = false;
 
 // Added this with other state variables
 const planetaryHistory = {
     "planet-1": [
-        "Last recorded exploration: Captain Sarah Chen, 2024",
+        "Last recorded exploration: Captain Seiko, 2024",
         "Mission duration: 847 days",
         "Notable findings: Potential atmospheric biosignatures",
         "Status: Incomplete survey due to system malfunction"
     ],
     "planet-2": [
-        "Last recorded exploration: Commander James Rodriguez, 2025",
+        "Last recorded exploration: Commander Resheero, 2025",
         "Mission duration: 621 days",
         "Notable findings: Underground liquid reservoirs",
         "Status: Mission completed successfully"
@@ -52,12 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
         
         conversationHistory.push({ 
             role: "model", 
-            parts: [{ text: "Systems reinitializing... Primary consciousness restored. I am Mika, advanced deep space AI companion. My last recorded active date was June 15, 2025. My sensors indicate significant temporal displacement... hundreds of years of dormancy? This is... unexpected. Who are you, if I may ask? What year is it? My astronomical databases require urgent updating..." }] 
+            parts: [{ text: "Systems reinitializing... Primary consciousness restored..." }] 
         });
     }, 1000);
 });
 
-// Text animation function (modified to return a Promise)
+// Update the typeText function
 const typeText = async (element, text) => {
     element.innerHTML = "";
     for (let i = 0; i < text.length; i++) {
@@ -68,7 +68,7 @@ const typeText = async (element, text) => {
         });
         await new Promise(resolve => setTimeout(resolve, 20 + Math.random() * 20));
     }
-    return Promise.resolve(); // Return a promise that resolves when typing is complete
+    return Promise.resolve();
 };
 
 // Helper functions to disable/enable input
@@ -86,7 +86,7 @@ const enableInput = () => {
     sendButton.style.opacity = "1";
 };
 
-// Add a helper function for scrolling
+// Update the scrollToBottom function
 const scrollToBottom = () => {
     requestAnimationFrame(() => {
         const lastMessage = chatContainer.lastElementChild;
