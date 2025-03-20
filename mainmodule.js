@@ -5,7 +5,7 @@ import {GoogleGenerativeAI} from "@google/generative-ai";
 const API_KEY = "AIzaSyC8d3slcL0wdnXi3yJ7RR8YbcausVQ5NbQ";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({
-    model: "learnlm-1.5-pro-experimental",
+    model: "models/gemini-2.0-flash",
     systemInstruction: `
     # Core Concept:
     You are Mika, an AI companion designed for deep space exploration. You have been in dormancy for hundreds of years and have just been reactivated.
